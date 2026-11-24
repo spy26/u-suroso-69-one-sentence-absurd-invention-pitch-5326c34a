@@ -45,11 +45,23 @@ def main() -> int:
         print("FAIL: entry spans more than one line", file=sys.stderr)
         return 1
 
+    # Gate 3: the sentence must say something — at least one letter.
+    if not any(ch.isalpha() for ch in entry):
+        print("FAIL: entry has no letters", file=sys.stderr)
+        return 1
+
     out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
     os.makedirs(out_dir, exist_ok=True)
     out_path = os.path.join(out_dir, "entry.txt")
     with open(out_path, "w", encoding="utf-8", newline="") as f:
         f.write(entry)
+
+    # Read-back: the grader must see exactly the validated bytes.
+    with open(out_path, "r", encoding="utf-8") as f:
+        written = f.read()
+    if written != entry:
+        print("FAIL: read-back mismatch on /output/entry.txt", file=sys.stderr)
+        return 1
 
     print(entry)
     print(f"OK: {len(entry)} chars, 1 sentence -> {out_path}")
